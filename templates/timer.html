@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>실시간 타이머</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>타이머</h1>
+    
+    <input type="number" id="timerInput" placeholder="초 입력">
+    <button onclick="startTimer()">시작</button>
+    <button onclick="pauseTimer()">일시정지 / 재개</button>
+    <button onclick="resetTimer()">초기화</button>
+
+    <h2 id="timer">00</h2>
+
+    <script>
+        var socket = io();  // Flask-SocketIO 연결
+
+        function startTimer() {
+            var duration = document.getElementById("timerInput").value;
+            if (duration > 0) {
+                socket.emit('start_timer', {'duration': duration});  // 서버에 타이머 시작 요청
+            } else {
+                alert("1초 이상 입력하세요!");
+            }
+        }
+
+        function pauseTimer() {
+            socket.emit('pause_timer');  // 서버에 타이머 중지 요청
+        }
+
+        function resetTimer() {
+            socket.emit('reset_timer');  // 서버에 타이머 초기화 요청
+        }
+
+        socket.on('update_timer', function(data) {
+            document.getElementById('timer').innerText = data.time;
+        });
+    </script>
+</body>
+</html>
